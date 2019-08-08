@@ -5,26 +5,15 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 set -e -x -u
 
 echo "Idea launcher tool"
-echo "Usage: <tool> <IDEA binaries>"
+echo "Usage: <tool> [install|run] <IDEA binaries>"
 echo ""
 echo ""
 
-FILE_NAME="$(basename "$1")"
-FILE_BASE="$(cd "$(dirname "$1")" && pwd)"
+FILE_NAME="$(basename "$2")"
+FILE_BASE="$(cd "$(dirname "$2")" && pwd)"
 FILE="${FILE_BASE}/${FILE_NAME}"
 
 MIRROR_FILE=${FILE}_dmg
-
-function detach_dmg {
-  hdiutil detach -force "${MIRROR_FILE}" || true
-}
-
-trap detach_dmg EXIT
-
-hdiutil attach -readonly -noautoopen -noautofsck -nobrowse -mountpoint "${MIRROR_FILE}" "$FILE"
-
-ls -lah "${MIRROR_FILE}"
-
 
 APP_DMG_HOME="$(cd "$(find "${MIRROR_FILE}" -type d -name "*.app")" && pwd)"
 APP_NAME="$(basename "$FILE" .dmg)"
@@ -35,32 +24,46 @@ APP_DATA="${APP_HOME}/data"
 echo "Traget app home: $APP_HOME"
 echo "Mounted IntelliJ IDE home is: $APP_DMG_HOME"
 
+if [ ! -d "${APP_DIR}" ] || [ "install" eq "$1" ]; then
+  
+  function detach_dmg {
+     hdiutil detach -force "${MIRROR_FILE}" || true
+  }
 
-rm /rf "${APP_DIR}" || true
-mkdir -p "${APP_HOME}" || true
+  trap detach_dmg EXIT
 
+  hdiutil attach -readonly -noautoopen -noautofsck -nobrowse -mountpoint "${MIRROR_FILE}" "$FILE"
 
-cp -R "${APP_DMG_HOME}" "${APP_HOME}"
+  ls -lah "${MIRROR_FILE}"
 
-VMOPTS="${APP_DIR}.vmoptions"
-cp "${APP_DMG_HOME}/Contents/bin/idea.vmoptions" "$VMOPTS"
+  rm /rf "${APP_DIR}" || true
+  mkdir -p "${APP_HOME}" || true
 
-PROFILER_MODE=tracing
-PROFILER_AGENT="/Applications/YourKit-Java-Profiler-2019.1.app/Contents/Resources/bin/mac/libyjpagent.jnilib"
+  cp -R "${APP_DMG_HOME}" "${APP_HOME}"
 
-echo "-agentpath:${PROFILER_AGENT}=onexit=snapshot,sessionname=TB_IJ_${APP_NAME},port=54444-54555,${PROFILER_MODE}" >> "$VMOPTS"
-echo "-Dide.no.platform.update=true"           >> "$VMOPTS"
-echo "-Didea.config.path=${APP_DATA}/config"   >> "$VMOPTS"
-echo "-Didea.system.path=${APP_DATA}/system"   >> "$VMOPTS"
-echo "-Didea.plugins.path=${APP_DATA}/plugins" >> "$VMOPTS"
-echo "-Didea.log.path=${APP_DATA}/log"         >> "$VMOPTS"
+  VMOPTS="${APP_DIR}.vmoptions"
+  cp "${APP_DMG_HOME}/Contents/bin/idea.vmoptions" "$VMOPTS"
 
-echo "The application is ready to run!"
-echo ""
-echo "open \"${APP_DIR}\""
-echo ""
-echo ""
+  PROFILER_MODE=tracing
+  PROFILER_AGENT="/Applications/YourKit-Java-Profiler-2019.1.app/Contents/Resources/bin/mac/libyjpagent.jnilib"
 
+  echo "-agentpath:${PROFILER_AGENT}=onexit=snapshot,sessionname=TB_IJ_${APP_NAME},port=54444-54555,${PROFILER_MODE}" >> "$VMOPTS"
+  echo "-Dide.no.platform.update=true"           >> "$VMOPTS"
+  echo "-Didea.config.path=${APP_DATA}/config"   >> "$VMOPTS"
+  echo "-Didea.system.path=${APP_DATA}/system"   >> "$VMOPTS"
+  echo "-Didea.plugins.path=${APP_DATA}/plugins" >> "$VMOPTS"
+  echo "-Didea.log.path=${APP_DATA}/log"         >> "$VMOPTS"
+
+  echo "The application is ready to run!"
+  echo ""
+  echo "open \"${APP_DIR}\""
+  echo ""
+  echo ""
+fi
+
+if [ "run" eq "$1" ]; then 
+  open "${APP_DIR}"
+fi
 
 
 
