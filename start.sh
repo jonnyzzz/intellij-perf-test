@@ -78,6 +78,7 @@ echo "-Didea.config.path=${APP_DATA}/config"   >> "$VMOPTS"
 echo "-Didea.system.path=${APP_DATA}/system"   >> "$VMOPTS"
 echo "-Didea.plugins.path=${APP_DATA}/plugins" >> "$VMOPTS"
 echo "-Didea.log.path=${APP_DATA}/log"         >> "$VMOPTS"
+echo "-Didea.log.perf.stats=true"              >> "$VMOPTS"
 echo "" >> "$VMOPTS"
 
 ## cleanup logs
