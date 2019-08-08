@@ -18,6 +18,7 @@ MIRROR_FILE=${FILE}_dmg
 
 APP_NAME="$(basename "$FILE" .dmg)"
 APP_HOME="${DIR}/runs/${APP_NAME}"
+APP_DATA="${DIR}/data"
 
 TASK=$1
 
@@ -56,8 +57,6 @@ fi
 
 
 APP_DIR="$(cd "$(find "${APP_HOME}" -type d -name "*.app")" && pwd)"
-APP_DATA="${APP_DIR}/data"
-
 
 VMOPTS="${APP_DIR}.vmoptions"
 rm "${VMOPTS}" || true
