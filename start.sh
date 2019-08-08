@@ -15,16 +15,16 @@ FILE="${FILE_BASE}/${FILE_NAME}"
 
 MIRROR_FILE=${FILE}_dmg
 
-APP_DMG_HOME="$(cd "$(find "${MIRROR_FILE}" -type d -name "*.app")" && pwd)"
+
 APP_NAME="$(basename "$FILE" .dmg)"
 APP_HOME="${DIR}/runs/${APP_NAME}"
-APP_DIR="${APP_HOME}/$(basename "${APP_DMG_HOME}")"
-APP_DATA="${APP_HOME}/data"
+
+TASK=$1
 
 echo "Traget app home: $APP_HOME"
-echo "Mounted IntelliJ IDE home is: $APP_DMG_HOME"
 
-if [ ! -d "${APP_DIR}" ] || [ "install" eq "$1" ]; then
+
+if [ "install" = "$TASK" ]; then
   
   function detach_dmg {
      hdiutil detach -force "${MIRROR_FILE}" || true
@@ -36,13 +36,32 @@ if [ ! -d "${APP_DIR}" ] || [ "install" eq "$1" ]; then
 
   ls -lah "${MIRROR_FILE}"
 
+  APP_DMG_HOME="$(cd "$(find "${MIRROR_FILE}" -type d -name "*.app")" && pwd)"
+  APP_DIR="${APP_HOME}/$(basename "${APP_DMG_HOME}")"
+
+  echo "Mounted IntelliJ IDE home is: $APP_DMG_HOME"
+
   rm /rf "${APP_DIR}" || true
   mkdir -p "${APP_HOME}" || true
 
   cp -R "${APP_DMG_HOME}" "${APP_HOME}"
+  
+  TASK=patch
+fi
 
+if [ ! -d "${APP_HOME}" ]; then
+   echo "Application is not installed!"
+   exit 1
+fi
+
+
+APP_DIR="$(cd "$(find "${APP_HOME}" -type d -name "*.app")" && pwd)"
+APP_DATA="${APP_DIR}/data"
+
+if [ "patch" = "$TASK" ]; then
   VMOPTS="${APP_DIR}.vmoptions"
-  cp "${APP_DMG_HOME}/Contents/bin/idea.vmoptions" "$VMOPTS"
+  rm "${VMOPTS}" || true
+  cp "${APP_DIR}/Contents/bin/idea.vmoptions" "$VMOPTS"
 
   PROFILER_MODE=tracing
   PROFILER_AGENT="/Applications/YourKit-Java-Profiler-2019.1.app/Contents/Resources/bin/mac/libyjpagent.jnilib"
@@ -54,14 +73,11 @@ if [ ! -d "${APP_DIR}" ] || [ "install" eq "$1" ]; then
   echo "-Didea.plugins.path=${APP_DATA}/plugins" >> "$VMOPTS"
   echo "-Didea.log.path=${APP_DATA}/log"         >> "$VMOPTS"
 
-  echo "The application is ready to run!"
-  echo ""
-  echo "open \"${APP_DIR}\""
-  echo ""
-  echo ""
 fi
 
-if [ "run" eq "$1" ]; then 
+
+if [ "run" = "$1" ]; then 
+
   open "${APP_DIR}"
 fi
 
