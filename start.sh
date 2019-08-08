@@ -58,27 +58,33 @@ fi
 APP_DIR="$(cd "$(find "${APP_HOME}" -type d -name "*.app")" && pwd)"
 APP_DATA="${APP_DIR}/data"
 
-if [ "patch" = "$TASK" ]; then
-  VMOPTS="${APP_DIR}.vmoptions"
-  rm "${VMOPTS}" || true
-  cp "${APP_DIR}/Contents/bin/idea.vmoptions" "$VMOPTS"
 
-  PROFILER_MODE=tracing
-  PROFILER_AGENT="/Applications/YourKit-Java-Profiler-2019.1.app/Contents/Resources/bin/mac/libyjpagent.jnilib"
+VMOPTS="${APP_DIR}.vmoptions"
+rm "${VMOPTS}" || true
+cp "${APP_DIR}/Contents/bin/idea.vmoptions" "$VMOPTS"
 
-  echo "-agentpath:${PROFILER_AGENT}=onexit=snapshot,sessionname=TB_IJ_${APP_NAME},port=54444-54555,${PROFILER_MODE}" >> "$VMOPTS"
-  echo "-Dide.no.platform.update=true"           >> "$VMOPTS"
-  echo "-Didea.config.path=${APP_DATA}/config"   >> "$VMOPTS"
-  echo "-Didea.system.path=${APP_DATA}/system"   >> "$VMOPTS"
-  echo "-Didea.plugins.path=${APP_DATA}/plugins" >> "$VMOPTS"
-  echo "-Didea.log.path=${APP_DATA}/log"         >> "$VMOPTS"
+PROFILER_MODE=tracing
+PROFILER_AGENT="/Applications/YourKit-Java-Profiler-2019.1.app/Contents/Resources/bin/mac/libyjpagent.jnilib"
 
+echo "" >> "$VMOPTS"
+echo "-agentpath:${PROFILER_AGENT}=onexit=snapshot,sessionname=TB_IJ_${APP_NAME},port=54444-54555,${PROFILER_MODE}" >> "$VMOPTS"
+echo "-Dide.no.platform.update=true"           >> "$VMOPTS"
+echo "-Didea.config.path=${APP_DATA}/config"   >> "$VMOPTS"
+echo "-Didea.system.path=${APP_DATA}/system"   >> "$VMOPTS"
+echo "-Didea.plugins.path=${APP_DATA}/plugins" >> "$VMOPTS"
+echo "-Didea.log.path=${APP_DATA}/log"         >> "$VMOPTS"
+echo "" >> "$VMOPTS"
+
+## IDEA-220286 :(
+if [ "run-open" = "$1" ]; then 
+  open -n -a "${APP_DIR}"
 fi
 
+if [ "run" = "$1" ]; then
 
-if [ "run" = "$1" ]; then 
+  IDEA="$(defaults read "${APP_DIR}/Contents/Info" CFBundleExecutable)"
 
-  open "${APP_DIR}"
+  exec "${APP_DIR}/Contents/MacOS/${IDEA}"
 fi
 
 
