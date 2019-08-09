@@ -2,4 +2,5 @@ builds
 binaries
 runs
 data
+logs
 .DS_Store

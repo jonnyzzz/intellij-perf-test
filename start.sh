@@ -57,6 +57,9 @@ fi
 
 
 APP_DIR="$(cd "$(find "${APP_HOME}" -type d -name "*.app")" && pwd)"
+APP_LOGS="${DIR}/logs/${APP_NAME}-$(date "+%Y%m%d-%H%M%S")"
+
+mkdirs -p "${APP_LOGS}" || true
 
 VMOPTS="${APP_DIR}.vmoptions"
 rm "${VMOPTS}" || true
@@ -76,17 +79,11 @@ echo "-Dide.no.platform.update=true"           >> "$VMOPTS"
 echo "-Didea.config.path=${APP_DATA}/config"   >> "$VMOPTS"
 echo "-Didea.system.path=${APP_DATA}/system"   >> "$VMOPTS"
 echo "-Didea.plugins.path=${APP_DATA}/plugins" >> "$VMOPTS"
-echo "-Didea.log.path=${APP_DATA}/log"         >> "$VMOPTS"
+echo "-Didea.log.path=${APP_LOGS}"             >> "$VMOPTS"
 echo ""                                        >> "$VMOPTS"
 echo "-Didea.log.perf.stats=true"              >> "$VMOPTS"
 echo "-Didea.log.perf.stats.file=${APP_DATA}/log/performance.json"  >> "$VMOPTS"
 echo ""                                        >> "$VMOPTS"
-
-## cleanup logs
-MASK="$(date "+%Y%m%d-%H%M%S")"
-rm -rf "${APP_DATA}/log.$MASK" || true
-mv "${APP_DATA}/log" "${APP_DATA}/log.$MASK" || true
-
 
 ## IDEA-220286 :(
 if [ "run-open" = "$1" ]; then 
