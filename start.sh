@@ -71,18 +71,21 @@ if [[ "yes" == "${PROFILE:-yes}" ]]; then
   echo "-agentpath:${PROFILER_AGENT}=onexit=snapshot,sessionname=TB_IJ_${APP_NAME},port=54444-54555,${PROFILER_MODE}" >> "$VMOPTS"
 fi
 
-echo "" >> "$VMOPTS"
+echo ""                                        >> "$VMOPTS"
 echo "-Dide.no.platform.update=true"           >> "$VMOPTS"
 echo "-Didea.config.path=${APP_DATA}/config"   >> "$VMOPTS"
 echo "-Didea.system.path=${APP_DATA}/system"   >> "$VMOPTS"
 echo "-Didea.plugins.path=${APP_DATA}/plugins" >> "$VMOPTS"
 echo "-Didea.log.path=${APP_DATA}/log"         >> "$VMOPTS"
+echo ""                                        >> "$VMOPTS"
 echo "-Didea.log.perf.stats=true"              >> "$VMOPTS"
-echo "" >> "$VMOPTS"
+echo "-Didea.log.perf.stats.file=${APP_DATA}/log/performance.json"  >> "$VMOPTS"
+echo ""                                        >> "$VMOPTS"
 
 ## cleanup logs
-rm -rf "${APP_DATA}/log.1" || true
-mv "${APP_DATA}/log" "${APP_DATA}/log.1" || true
+MASK="$(date "+%Y%m%d-%H%M%S")"
+rm -rf "${APP_DATA}/log.$MASK" || true
+mv "${APP_DATA}/log" "${APP_DATA}/log.$MASK" || true
 
 
 ## IDEA-220286 :(
