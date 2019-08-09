@@ -83,6 +83,8 @@ echo "-Didea.log.path=${APP_LOGS}"             >> "$VMOPTS"
 echo ""                                        >> "$VMOPTS"
 echo "-Didea.log.perf.stats=true"              >> "$VMOPTS"
 echo "-Didea.log.perf.stats.file=${APP_DATA}/log/performance.json"  >> "$VMOPTS"
+## see IconsLoadTime class for the static magic
+echo "-Didea.measure.icon.load.time=true"       >> "$VMOPTS"
 echo ""                                        >> "$VMOPTS"
 
 ## IDEA-220286 :(
